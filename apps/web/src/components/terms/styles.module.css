@@ -19,7 +19,7 @@
 
 .header {
   padding: var(--space-3);
-  background: linear-gradient(90deg, #b0ffc9 0%, #d7f6ff 99.5%);
+  background: linear-gradient(90deg, #FF9E9C 0%, #d7f6ff 99.5%);
   border-radius: 8px 8px 0 0;
   text-align: center;
 }

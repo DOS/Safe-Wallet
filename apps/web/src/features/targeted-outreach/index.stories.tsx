@@ -169,7 +169,7 @@ export const AnnouncementPopup: StoryObj = {
         p: 3,
         maxWidth: 450,
         position: 'relative',
-        background: 'linear-gradient(135deg, #12FF80 0%, #00D9FF 100%)',
+        background: 'linear-gradient(135deg, #FF2E29 0%, #00D9FF 100%)',
         color: 'black',
       }}
     >

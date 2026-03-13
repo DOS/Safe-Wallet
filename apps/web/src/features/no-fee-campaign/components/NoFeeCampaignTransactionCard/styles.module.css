@@ -1,7 +1,7 @@
 .card {
   padding: 24px;
   background: #ffffff;
-  border: 1px solid #b0ffc9;
+  border: 1px solid #FF9E9C;
   border-radius: 6px;
   height: 100%;
   position: relative;
@@ -9,7 +9,7 @@
 
 .dark .card {
   background: linear-gradient(90deg, rgba(176, 255, 201, 0.05) 0%, rgba(215, 246, 255, 0.05) 99.5%);
-  border: linear-gradient(225deg, #5fddff 12.5%, #12ff80 88.07%);
+  border: linear-gradient(225deg, #5fddff 12.5%, #FF2E29 88.07%);
 }
 
 .cardContent {

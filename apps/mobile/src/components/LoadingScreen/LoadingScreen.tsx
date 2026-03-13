@@ -11,7 +11,7 @@ interface LoadingScreenProps {
 export function LoadingScreen({ title, description }: LoadingScreenProps) {
   return (
     <View flex={1} justifyContent="center" alignItems="center">
-      <Loader size={64} color="#12FF80" />
+      <Loader size={64} color="#FF2E29" />
       <H4 fontWeight={600} marginTop="$7" marginBottom="$4">
         {title}
       </H4>

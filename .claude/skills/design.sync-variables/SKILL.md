@@ -69,12 +69,12 @@ User provides export:
 
 ```css
 --general-background: #ffffff;
---general-primary: #12ff80;
+--general-primary: #FF2E29;
 ```
 
 Update in globals.css:
 
 ```css
 --background: #ffffff;
---primary: #12ff80;
+--primary: #FF2E29;
 ```

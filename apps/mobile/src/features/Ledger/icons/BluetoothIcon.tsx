@@ -15,7 +15,7 @@ export const BluetoothIcon = () => (
     <Defs>
       <LinearGradient id="paint0_linear_8061_34196" x1="13" y1="1" x2="13" y2="33" gradientUnits="userSpaceOnUse">
         <Stop stopColor="white" />
-        <Stop offset="1" stopColor="#12FF80" />
+        <Stop offset="1" stopColor="#FF2E29" />
       </LinearGradient>
     </Defs>
   </Svg>

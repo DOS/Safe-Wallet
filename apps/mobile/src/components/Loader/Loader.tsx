@@ -7,7 +7,7 @@ type LoaderProps = CircleSnailPropTypes & {
   color?: string
 }
 
-export function Loader({ size = 64, color = '#12FF80', ...rest }: LoaderProps) {
+export function Loader({ size = 64, color = '#FF2E29', ...rest }: LoaderProps) {
   return (
     <View justifyContent="center" alignItems="center">
       <CircleSnail size={size} color={color} {...rest} />

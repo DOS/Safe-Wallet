@@ -10,7 +10,7 @@ const staticColors: StaticColors = {
   light: '#636669',
   primary: '#FFFFFF',
   textSecondary: '#A1A3A7',
-  textBrand: '#12FF80',
+  textBrand: '#FF2E29',
 }
 
 export default staticColors

@@ -17,10 +17,10 @@ const lightPalette: ColorPalette = {
     light: '#636669',
   },
   secondary: {
-    dark: '#0FDA6D',
-    main: '#12FF80',
-    light: '#B0FFC9',
-    background: '#EFFFF4',
+    dark: '#CC2420',
+    main: '#FF2E29',
+    light: '#FF9E9C',
+    background: '#FFF0EF',
   },
   border: {
     main: '#A1A3A7',
@@ -65,7 +65,7 @@ const lightPalette: ColorPalette = {
     main: '#F4F4F4',
     sheet: '#F4F4F4',
     paper: '#FFFFFF',
-    light: '#EFFFF4',
+    light: '#FFF0EF',
     secondary: '#DDDEE0',
     skeleton: 'rgba(0, 0, 0, 0.04)',
     disabled: '#7878801F',
@@ -82,7 +82,7 @@ const lightPalette: ColorPalette = {
     light: '#636669',
     primary: '#FFFFFF',
     textSecondary: '#A1A3A7',
-    textBrand: '#12FF80',
+    textBrand: '#FF2E29',
   },
 }
 
