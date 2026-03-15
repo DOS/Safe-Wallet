@@ -37,4 +37,5 @@ RUN yarn build
 ENV PORT=8080
 EXPOSE 8080
 
-CMD ["npx", "next", "start", "-p", "8080"]
+RUN npx -y serve --version
+CMD ["npx", "serve", "out", "-l", "8080"]
