@@ -62,9 +62,9 @@ function patchFile(filePath, contractName) {
       return false
     }
 
-    content.networkAddresses[CHAIN_ID] = addr
+    content.networkAddresses[CHAIN_ID] = 'canonical'
     writeFileSync(filePath, JSON.stringify(content, null, 2) + '\n')
-    console.log(`  [ok] ${contractName} → ${addr}`)
+    console.log(`  [ok] ${contractName} → canonical`)
     return true
   } catch (e) {
     console.log(`  [err] ${contractName}: ${e.message}`)
@@ -80,19 +80,23 @@ if (!deploymentsDir) {
 
 console.log(`Patching safe-deployments at: ${deploymentsDir}`)
 
-// Patch v1.4.1 assets in safe-deployments
-const assetsDir = join(deploymentsDir, 'dist', 'assets', 'v1.4.1')
-try {
-  const files = readdirSync(assetsDir)
-  let patched = 0
-  for (const file of files) {
-    if (!file.endsWith('.json')) continue
-    const contractName = file.replace('.json', '')
-    if (patchFile(join(assetsDir, file), contractName)) patched++
+// Patch v1.4.1 assets in safe-deployments (both src and dist)
+let totalPatched = 0
+for (const subdir of ['dist/assets/v1.4.1', 'src/assets/v1.4.1']) {
+  const assetsDir = join(deploymentsDir, subdir)
+  try {
+    const files = readdirSync(assetsDir)
+    let patched = 0
+    for (const file of files) {
+      if (!file.endsWith('.json')) continue
+      const contractName = file.replace('.json', '')
+      if (patchFile(join(assetsDir, file), contractName)) patched++
+    }
+    console.log(`Patched ${patched} files in safe-deployments/${subdir} for chain ${CHAIN_ID}`)
+    totalPatched += patched
+  } catch (e) {
+    console.log(`Could not read ${subdir}: ${e.message}`)
   }
-  console.log(`Patched ${patched} files in safe-deployments for chain ${CHAIN_ID}`)
-} catch (e) {
-  console.log(`Could not read assets dir: ${e.message}`)
 }
 
 // Also patch @safe-global/types-kit which has its own copy of contract assets
