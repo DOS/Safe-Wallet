@@ -49,25 +49,23 @@ function findDeploymentsDir() {
   return null
 }
 
-function patchFile(filePath, contractName) {
+function patchFile(filePath, fileName) {
   try {
     const content = JSON.parse(readFileSync(filePath, 'utf-8'))
     if (!content.networkAddresses) return false
-
-    const addr = DOS_ADDRESSES[contractName]
-    if (!addr) return false
+    if (!content.deployments?.canonical) return false
 
     if (content.networkAddresses[CHAIN_ID]) {
-      console.log(`  [skip] ${contractName} already has chain ${CHAIN_ID}`)
+      console.log(`  [skip] ${fileName} already has chain ${CHAIN_ID}`)
       return false
     }
 
     content.networkAddresses[CHAIN_ID] = 'canonical'
     writeFileSync(filePath, JSON.stringify(content, null, 2) + '\n')
-    console.log(`  [ok] ${contractName} → canonical`)
+    console.log(`  [ok] ${fileName} → canonical`)
     return true
   } catch (e) {
-    console.log(`  [err] ${contractName}: ${e.message}`)
+    console.log(`  [err] ${fileName}: ${e.message}`)
     return false
   }
 }
@@ -89,8 +87,7 @@ for (const subdir of ['dist/assets/v1.4.1', 'src/assets/v1.4.1']) {
     let patched = 0
     for (const file of files) {
       if (!file.endsWith('.json')) continue
-      const contractName = file.replace('.json', '')
-      if (patchFile(join(assetsDir, file), contractName)) patched++
+      if (patchFile(join(assetsDir, file), file)) patched++
     }
     console.log(`Patched ${patched} files in safe-deployments/${subdir} for chain ${CHAIN_ID}`)
     totalPatched += patched
