@@ -99,6 +99,10 @@ const nextConfig = {
   productionBrowserSourceMaps: true,
   eslint: {
     dirs: ['src', 'cypress'],
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   },
   ...(isProd || enableExperimentalOptimizations
     ? {

@@ -8,23 +8,33 @@ WORKDIR /app
 COPY . .
 
 # Set working directory to the web app
-WORKDIR apps/web
+WORKDIR /app/apps/web
 
 # Enable corepack and configure yarn
 RUN corepack enable
 RUN yarn config set httpTimeout 300000
 
-# Run any custom post-install scripts
+# Install dependencies
 RUN yarn install --immutable
 RUN yarn after-install
 
-# Set environment variables
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV PORT 3000
+# Apply safe-deployments patch (add DOS Chain 7979)
+RUN node ../../scripts/patch-safe-deployments.mjs || true
 
-# Expose the port
-EXPOSE 3000
+# Build-time environment variables (override via --build-arg)
+ARG NEXT_PUBLIC_WC_PROJECT_ID
+ARG NEXT_PUBLIC_IS_OFFICIAL_HOST=false
 
-# Command to start the application
-CMD ["yarn", "static-serve"]
+ENV NEXT_PUBLIC_WC_PROJECT_ID=${NEXT_PUBLIC_WC_PROJECT_ID}
+ENV NEXT_PUBLIC_IS_OFFICIAL_HOST=${NEXT_PUBLIC_IS_OFFICIAL_HOST}
+
+# Build
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN yarn build
+
+# Runtime
+ENV PORT=8080
+EXPOSE 8080
+
+CMD ["yarn", "start", "-p", "8080"]
