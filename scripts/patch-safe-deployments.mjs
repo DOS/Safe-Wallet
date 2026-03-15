@@ -80,7 +80,7 @@ if (!deploymentsDir) {
 
 console.log(`Patching safe-deployments at: ${deploymentsDir}`)
 
-// Patch v1.4.1 assets
+// Patch v1.4.1 assets in safe-deployments
 const assetsDir = join(deploymentsDir, 'dist', 'assets', 'v1.4.1')
 try {
   const files = readdirSync(assetsDir)
@@ -90,7 +90,73 @@ try {
     const contractName = file.replace('.json', '')
     if (patchFile(join(assetsDir, file), contractName)) patched++
   }
-  console.log(`Patched ${patched} files for chain ${CHAIN_ID}`)
+  console.log(`Patched ${patched} files in safe-deployments for chain ${CHAIN_ID}`)
 } catch (e) {
   console.log(`Could not read assets dir: ${e.message}`)
 }
+
+// Also patch @safe-global/types-kit which has its own copy of contract assets
+// Protocol-kit uses types-kit to resolve contract addresses
+function patchTypesKit() {
+  const typesKitCandidates = [
+    join(__dirname, '..', 'node_modules', '@safe-global', 'types-kit'),
+    join(__dirname, '..', 'apps', 'web', 'node_modules', '@safe-global', 'types-kit'),
+  ]
+
+  let typesKitDir = null
+  for (const dir of typesKitCandidates) {
+    try { readdirSync(dir); typesKitDir = dir; break } catch {}
+  }
+  if (!typesKitDir) {
+    console.log('types-kit not found, skipping')
+    return
+  }
+
+  console.log(`Patching types-kit at: ${typesKitDir}`)
+
+  // types-kit stores assets as JS modules (not JSON), need different approach
+  const contractDirs = {
+    'MultiSend': { versions: ['v1.3.0', 'v1.4.1'], files: ['multi_send'] },
+    'MultiSendCallOnly': { versions: ['v1.3.0', 'v1.4.1'], files: ['multi_send_call_only'] },
+    'Safe': { versions: ['v1.3.0', 'v1.4.1'], files: ['safe', 'safe_l2'] },
+    'SafeProxyFactory': { versions: ['v1.3.0', 'v1.4.1'], files: ['safe_proxy_factory'] },
+    'CompatibilityFallbackHandler': { versions: ['v1.3.0', 'v1.4.1'], files: ['compatibility_fallback_handler'] },
+    'SignMessageLib': { versions: ['v1.3.0', 'v1.4.1'], files: ['sign_message_lib'] },
+    'CreateCall': { versions: ['v1.3.0', 'v1.4.1'], files: ['create_call'] },
+    'SimulateTxAccessor': { versions: ['v1.3.0', 'v1.4.1'], files: ['simulate_tx_accessor'] },
+  }
+
+  let patched = 0
+  for (const [dirName, config] of Object.entries(contractDirs)) {
+    for (const version of config.versions) {
+      // Only patch v1.4.1 (contracts we actually deployed)
+      if (version !== 'v1.4.1') continue
+      for (const fileName of config.files) {
+        const jsFile = join(typesKitDir, 'dist', 'src', 'contracts', 'assets', dirName, version, `${fileName}.js`)
+        try {
+          let content = readFileSync(jsFile, 'utf-8')
+          if (content.includes(`"${CHAIN_ID}"`)) {
+            console.log(`  [skip] types-kit ${dirName}/${version}/${fileName} already has ${CHAIN_ID}`)
+            continue
+          }
+          // JS file exports an object with networkAddresses. Insert 7979: "canonical"
+          // Find the pattern "7897": "canonical" and add after it
+          if (content.includes('"7897"')) {
+            content = content.replace('"7897": "canonical"', `"7897": "canonical",\n    "${CHAIN_ID}": "canonical"`)
+          } else {
+            // Fallback: add before closing of networkAddresses
+            content = content.replace(/("networkAddresses":\s*\{[^}]*)(})/, `$1,\n    "${CHAIN_ID}": "canonical"\n$2`)
+          }
+          writeFileSync(jsFile, content)
+          console.log(`  [ok] types-kit ${dirName}/${version}/${fileName}`)
+          patched++
+        } catch (e) {
+          // File might not exist for this version/contract combo
+        }
+      }
+    }
+  }
+  console.log(`Patched ${patched} files in types-kit for chain ${CHAIN_ID}`)
+}
+
+patchTypesKit()
