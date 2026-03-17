@@ -96,6 +96,29 @@ for (const subdir of ['dist/assets/v1.4.1', 'src/assets/v1.4.1', 'dist/assets/v1
   }
 }
 
+// Patch safe_migration.json (v1.5.0 only) — has per-chain addresses, not canonical
+for (const subdir of ['dist/assets/v1.5.0', 'src/assets/v1.5.0']) {
+  const migrationFile = join(deploymentsDir, subdir, 'safe_migration.json')
+  try {
+    const content = JSON.parse(readFileSync(migrationFile, 'utf-8'))
+    if (content.networkAddresses?.[CHAIN_ID]) {
+      console.log(`  [skip] ${subdir}/safe_migration.json already has chain ${CHAIN_ID}`)
+    } else {
+      if (!content.networkAddresses) content.networkAddresses = {}
+      content.networkAddresses[CHAIN_ID] = '0x72108DBB993bd8c050184FC349F9D32112F6E153'
+      if (!content.deployments) content.deployments = {}
+      content.deployments['0x72108DBB993bd8c050184FC349F9D32112F6E153'] = {
+        address: '0x72108DBB993bd8c050184FC349F9D32112F6E153'
+      }
+      writeFileSync(migrationFile, JSON.stringify(content, null, 2) + '\n')
+      console.log(`  [ok] ${subdir}/safe_migration.json → 0x72108DBB...`)
+      totalPatched++
+    }
+  } catch (e) {
+    console.log(`  [info] ${subdir}/safe_migration.json not found, skipping`)
+  }
+}
+
 // Also patch @safe-global/types-kit which has its own copy of contract assets
 // Protocol-kit uses types-kit to resolve contract addresses
 function patchTypesKit() {
