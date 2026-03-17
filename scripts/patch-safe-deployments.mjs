@@ -78,9 +78,9 @@ if (!deploymentsDir) {
 
 console.log(`Patching safe-deployments at: ${deploymentsDir}`)
 
-// Patch v1.4.1 assets in safe-deployments (both src and dist)
+// Patch v1.4.1 and v1.5.0 assets in safe-deployments (both src and dist)
 let totalPatched = 0
-for (const subdir of ['dist/assets/v1.4.1', 'src/assets/v1.4.1']) {
+for (const subdir of ['dist/assets/v1.4.1', 'src/assets/v1.4.1', 'dist/assets/v1.5.0', 'src/assets/v1.5.0']) {
   const assetsDir = join(deploymentsDir, subdir)
   try {
     const files = readdirSync(assetsDir)
@@ -117,21 +117,21 @@ function patchTypesKit() {
 
   // types-kit stores assets as JS modules (not JSON), need different approach
   const contractDirs = {
-    'MultiSend': { versions: ['v1.3.0', 'v1.4.1'], files: ['multi_send'] },
-    'MultiSendCallOnly': { versions: ['v1.3.0', 'v1.4.1'], files: ['multi_send_call_only'] },
-    'Safe': { versions: ['v1.3.0', 'v1.4.1'], files: ['safe', 'safe_l2'] },
-    'SafeProxyFactory': { versions: ['v1.3.0', 'v1.4.1'], files: ['safe_proxy_factory'] },
-    'CompatibilityFallbackHandler': { versions: ['v1.3.0', 'v1.4.1'], files: ['compatibility_fallback_handler'] },
-    'SignMessageLib': { versions: ['v1.3.0', 'v1.4.1'], files: ['sign_message_lib'] },
-    'CreateCall': { versions: ['v1.3.0', 'v1.4.1'], files: ['create_call'] },
-    'SimulateTxAccessor': { versions: ['v1.3.0', 'v1.4.1'], files: ['simulate_tx_accessor'] },
+    'MultiSend': { versions: ['v1.3.0', 'v1.4.1', 'v1.5.0'], files: ['multi_send'] },
+    'MultiSendCallOnly': { versions: ['v1.3.0', 'v1.4.1', 'v1.5.0'], files: ['multi_send_call_only'] },
+    'Safe': { versions: ['v1.3.0', 'v1.4.1', 'v1.5.0'], files: ['safe', 'safe_l2'] },
+    'SafeProxyFactory': { versions: ['v1.3.0', 'v1.4.1', 'v1.5.0'], files: ['safe_proxy_factory'] },
+    'CompatibilityFallbackHandler': { versions: ['v1.3.0', 'v1.4.1', 'v1.5.0'], files: ['compatibility_fallback_handler'] },
+    'SignMessageLib': { versions: ['v1.3.0', 'v1.4.1', 'v1.5.0'], files: ['sign_message_lib'] },
+    'CreateCall': { versions: ['v1.3.0', 'v1.4.1', 'v1.5.0'], files: ['create_call'] },
+    'SimulateTxAccessor': { versions: ['v1.3.0', 'v1.4.1', 'v1.5.0'], files: ['simulate_tx_accessor'] },
   }
 
   let patched = 0
   for (const [dirName, config] of Object.entries(contractDirs)) {
     for (const version of config.versions) {
-      // Only patch v1.4.1 (contracts we actually deployed)
-      if (version !== 'v1.4.1') continue
+      // Patch v1.4.1 and v1.5.0 (both deployed on DOS Chain)
+      if (version !== 'v1.4.1' && version !== 'v1.5.0') continue
       for (const fileName of config.files) {
         const jsFile = join(typesKitDir, 'dist', 'src', 'contracts', 'assets', dirName, version, `${fileName}.js`)
         try {
