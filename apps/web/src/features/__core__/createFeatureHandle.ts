@@ -2,6 +2,9 @@ import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { FeatureHandle, FeatureImplementation } from './types'
 
+// Features always enabled for self-hosted deployments (CGW may not pass all flags)
+const ALWAYS_ENABLED_FEATURES = new Set<string>(['myAccounts', 'batching'])
+
 // Semantic mapping from folder names to feature flags
 // This allows features to omit the second parameter when the flag name
 // doesn't match the folder name convention
@@ -49,6 +52,15 @@ export function createFeatureHandle<T extends FeatureImplementation = FeatureImp
   folderName: string,
   featureFlag?: FEATURES,
 ): FeatureHandle<T> {
+  // 0. Always-enabled features for self-hosted deployments
+  if (ALWAYS_ENABLED_FEATURES.has(folderName)) {
+    return {
+      name: folderName,
+      useIsEnabled: () => true,
+      load: () => import(/* webpackMode: "lazy" */ `../${folderName}/feature`) as Promise<{ default: T }>,
+    }
+  }
+
   // 1. Use explicit override if provided
   if (featureFlag !== undefined) {
     return {
