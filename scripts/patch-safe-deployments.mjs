@@ -105,13 +105,13 @@ for (const subdir of ['dist/assets/v1.5.0', 'src/assets/v1.5.0']) {
       console.log(`  [skip] ${subdir}/safe_migration.json already has chain ${CHAIN_ID}`)
     } else {
       if (!content.networkAddresses) content.networkAddresses = {}
-      content.networkAddresses[CHAIN_ID] = '0x72108DBB993bd8c050184FC349F9D32112F6E153'
+      content.networkAddresses[CHAIN_ID] = '0xffCC7119526cc9783989135173Bc083836cd4700'
       if (!content.deployments) content.deployments = {}
-      content.deployments['0x72108DBB993bd8c050184FC349F9D32112F6E153'] = {
-        address: '0x72108DBB993bd8c050184FC349F9D32112F6E153'
+      content.deployments['0xffCC7119526cc9783989135173Bc083836cd4700'] = {
+        address: '0xffCC7119526cc9783989135173Bc083836cd4700'
       }
       writeFileSync(migrationFile, JSON.stringify(content, null, 2) + '\n')
-      console.log(`  [ok] ${subdir}/safe_migration.json → 0x72108DBB...`)
+      console.log(`  [ok] ${subdir}/safe_migration.json → 0xffCC7119...`)
       totalPatched++
     }
   } catch (e) {
