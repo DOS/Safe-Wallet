@@ -42,8 +42,8 @@ const getChangeFallbackHandlerCallData = async (
 export const createUpdateSafeTxs = async (safe: SafeState, chain: Chain): Promise<MetaTransactionData[]> => {
   assertValidSafeVersion(safe.version)
 
-  // 1.3.0 Safes are updated using a delegate call to a migration contract
-  if (semverSatisfies(safe.version, '1.3.0')) {
+  // 1.3.0+ Safes are updated using a delegate call to a migration contract
+  if (semverSatisfies(safe.version, '>=1.3.0')) {
     return [createUpdateMigration(chain, safe.version, safe.fallbackHandler?.value)]
   }
 
