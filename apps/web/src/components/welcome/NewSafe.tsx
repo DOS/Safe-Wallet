@@ -15,7 +15,7 @@ const NewSafe = () => {
           {IS_OFFICIAL_HOST ? (
             <SafeLabsLogo className={css.logo} />
           ) : BRAND_LOGO ? (
-            <img src={BRAND_LOGO} alt={BRAND_NAME} className={css.logo} />
+            <img src={BRAND_LOGO} alt={BRAND_NAME} style={{ height: 40, width: 'auto' }} />
           ) : (
             <SafeLabsLogo className={css.logo} />
           )}
