@@ -105,11 +105,7 @@ for (const subdir of ['dist/assets/v1.5.0', 'src/assets/v1.5.0']) {
       console.log(`  [skip] ${subdir}/safe_migration.json already has chain ${CHAIN_ID}`)
     } else {
       if (!content.networkAddresses) content.networkAddresses = {}
-      content.networkAddresses[CHAIN_ID] = '0xffCC7119526cc9783989135173Bc083836cd4700'
-      if (!content.deployments) content.deployments = {}
-      content.deployments['0xffCC7119526cc9783989135173Bc083836cd4700'] = {
-        address: '0xffCC7119526cc9783989135173Bc083836cd4700'
-      }
+      content.networkAddresses[CHAIN_ID] = 'canonical'
       writeFileSync(migrationFile, JSON.stringify(content, null, 2) + '\n')
       console.log(`  [ok] ${subdir}/safe_migration.json → 0xffCC7119...`)
       totalPatched++
