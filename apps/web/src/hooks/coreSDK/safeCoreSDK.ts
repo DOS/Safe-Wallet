@@ -100,6 +100,26 @@ export const initSafeSDK = async ({
     contractNetworks,
   })
 
+  // For self-hosted chains not in safe-deployments, provide contract addresses explicitly
+  // This bypasses the safe-deployments lookup that fails for custom chains
+  if (!contractNetworks?.[chainId]) {
+    contractNetworks = {
+      ...contractNetworks,
+      [chainId]: {
+        ...contractNetworks?.[chainId],
+        multiSendAddress: '0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526',
+        multiSendCallOnlyAddress: '0x9641d764fc13c8B624c04430C7356C1C7C8102e2',
+        safeSingletonAddress: '0x41675C099F32341bf84BFc5382aF534df5C7461a',
+        safeSingletonL2Address: '0x29fcB43b46531BcA003ddC8FCB67FFE91900C762',
+        safeProxyFactoryAddress: '0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67',
+        fallbackHandlerAddress: '0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99',
+        signMessageLibAddress: '0xd53cd0aB83D845Ac265BE939c57F53AD838012c9',
+        createCallAddress: '0x9b35Af71d77eaf8d7e40252370304687390A1A52',
+        simulateTxAccessorAddress: '0x3d4BA2E0884aa488718476ca2FB8Efc291A46199',
+      },
+    }
+  }
+
   if (undeployedSafe) {
     if (isPredictedSafeProps(undeployedSafe.props) || isReplayedSafeProps(undeployedSafe.props)) {
       return Safe.init({
