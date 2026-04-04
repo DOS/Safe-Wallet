@@ -180,3 +180,41 @@ function patchTypesKit() {
 }
 
 patchTypesKit()
+
+// Patch protocol-kit to support Safe v1.5.0
+// protocol-kit ^5.2.25 only has case '1.4.1' in switch statements
+// Adding case '1.5.0' before each '1.4.1' case makes it use the same contract class
+function patchProtocolKit() {
+  const candidates = [
+    join(__dirname, '..', 'node_modules', '@safe-global', 'protocol-kit'),
+    join(__dirname, '..', 'apps', 'web', 'node_modules', '@safe-global', 'protocol-kit'),
+  ]
+
+  let pkDir = null
+  for (const dir of candidates) {
+    try { readdirSync(dir); pkDir = dir; break } catch {}
+  }
+  if (!pkDir) {
+    console.log('protocol-kit not found, skipping v1.5.0 patch')
+    return
+  }
+
+  const contractInstancesFile = join(pkDir, 'dist', 'src', 'contracts', 'contractInstances.js')
+  try {
+    let content = readFileSync(contractInstancesFile, 'utf-8')
+    if (content.includes("case '1.5.0':")) {
+      console.log('[skip] protocol-kit already has 1.5.0 support')
+      return
+    }
+
+    // Add case '1.5.0': before every case '1.4.1':
+    const count = (content.match(/case '1\.4\.1':/g) || []).length
+    content = content.replace(/case '1\.4\.1':/g, "case '1.5.0':\n        case '1.4.1':")
+    writeFileSync(contractInstancesFile, content)
+    console.log(`[ok] protocol-kit: added case '1.5.0' to ${count} switch statements`)
+  } catch (e) {
+    console.log(`[err] protocol-kit patch: ${e.message}`)
+  }
+}
+
+patchProtocolKit()

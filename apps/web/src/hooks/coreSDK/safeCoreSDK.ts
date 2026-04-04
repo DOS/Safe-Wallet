@@ -100,9 +100,38 @@ export const initSafeSDK = async ({
     contractNetworks,
   })
 
-  // For self-hosted chains not in safe-deployments, provide contract addresses explicitly
-  // This bypasses the safe-deployments lookup that fails for custom chains
-  if (!contractNetworks?.[chainId]) {
+  // For DOS Chain (7979): always provide contract addresses explicitly
+  // Covers both v1.4.1 and v1.5.0 contracts deployed on DOS Chain
+  // This bypasses the safe-deployments lookup that fails for custom chains in webpack bundles
+  if (chainId === '7979') {
+    contractNetworks = {
+      ...contractNetworks,
+      [chainId]: {
+        ...contractNetworks?.[chainId],
+        // v1.4.1 contracts
+        multiSendAddress: '0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526',
+        multiSendCallOnlyAddress: '0x9641d764fc13c8B624c04430C7356C1C7C8102e2',
+        safeSingletonAddress: '0x41675C099F32341bf84BFc5382aF534df5C7461a',
+        safeSingletonL2Address: '0x29fcB43b46531BcA003ddC8FCB67FFE91900C762',
+        safeProxyFactoryAddress: '0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67',
+        fallbackHandlerAddress: '0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99',
+        signMessageLibAddress: '0xd53cd0aB83D845Ac265BE939c57F53AD838012c9',
+        createCallAddress: '0x9b35Af71d77eaf8d7e40252370304687390A1A52',
+        simulateTxAccessorAddress: '0x3d4BA2E0884aa488718476ca2FB8Efc291A46199',
+        // v1.5.0 contracts (canonical addresses)
+        safeSingletonAddress: '0xFf51A5898e281Db6DfC7855790607438dF2ca44b',
+        safeSingletonL2Address: '0xEdd160fEBBD92E350D4D398fb636302fccd67C7e',
+        safeProxyFactoryAddress: '0x14F2982D601c9458F93bd70B218933A6f8165e7b',
+        fallbackHandlerAddress: '0x3EfCBb83A4A7AfcB4F68D501E2c2203a38be77f4',
+        multiSendAddress: '0x218543288004CD07832472D464648173c77D7eB7',
+        multiSendCallOnlyAddress: '0xA83c336B20401Af773B6219BA5027174338D1836',
+        signMessageLibAddress: '0x4FfeF8222648872B3dE295Ba1e49110E61f5b5aa',
+        createCallAddress: '0x2Ef5ECfbea521449E4De05EDB1ce63B75eDA90B4',
+        simulateTxAccessorAddress: '0x07EfA797c55B5DdE3698d876b277aBb6B893654C',
+      },
+    }
+  } else if (!contractNetworks?.[chainId]) {
+    // For other unknown chains, provide v1.4.1 defaults
     contractNetworks = {
       ...contractNetworks,
       [chainId]: {
