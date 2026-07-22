@@ -1,9 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import * as wallet from '../../support/utils/wallet.js'
 import * as space from '../pages/spaces.page.js'
-import * as navigation from '../pages/navigation.page'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -17,22 +15,25 @@ describe('Spaces basic flow tests', () => {
   })
 
   beforeEach(() => {
+    space.blockBeamer()
+    space.interceptSpacesList()
     cy.visit(constants.spacesUrl)
   })
 
   it('Verify a user can sign in, create, rename and delete an organisation', () => {
-    const spaceName = 'Space_' + Math.random().toString(36).substring(2, 12)
-    const newSpaceName = 'Renamed Space'
+    const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
+    const newSpaceName = 'Renamed Space' + Math.random().toString(36).substring(2, 12)
 
-    wallet.connectSigner(admin)
-    space.clickOnSignInBtn()
-    space.deleteAllSpaces()
-    main.verifyElementsIsVisible([space.createSpaceBtn])
-    space.createSpace(spaceName)
+    space.signInWithWallet(admin)
+    space.goToSpacesView()
+    space.ensureReadyToCreateSpace()
+    cy.wait(3000)
+    space.createSpaceViaOnboardingWithSkip(spaceName)
+
     space.clickOnSpaceSelector(spaceName)
     space.spaceExists(spaceName)
     space.goToSpaceSettings()
-    main.verifyElementByTextExists('General')
+    space.verifySpaceSettingsGeneralLoaded()
     space.editSpace(newSpaceName)
     space.clickOnSpaceSelector(newSpaceName)
     space.spaceExists(newSpaceName)
@@ -42,35 +43,60 @@ describe('Spaces basic flow tests', () => {
   })
 
   it('Verify an account can be added manually', () => {
-    const spaceName = 'Space_' + Math.random().toString(36).substring(2, 12)
+    // Adding a Safe already in the workspace is a no-op ("Add accounts (0)", disabled), so create a
+    // fresh empty workspace, add into it, then delete it — keeping the run idempotent regardless of
+    // what previous runs left in the account. The Safe accounts page is the persistent add entry point.
+    const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
 
-    wallet.connectSigner(admin)
-    space.clickOnSignInBtn()
-    space.deleteAllSpaces()
-    space.createSpace(spaceName)
+    space.signInWithWallet(admin)
+    space.goToSpacesView()
+    space.ensureReadyToCreateSpace()
+    cy.wait(3000)
+    space.createSpaceViaOnboardingWithSkip(spaceName)
+    space.goToSpaceSafeAccounts()
     space.addAccountManually(staticSafes.SEP_STATIC_SAFE_35.substring(4), constants.networks.sepolia)
+    space.goToSpaceSettings()
+    space.verifySpaceSettingsGeneralLoaded()
+    space.deleteSpace(spaceName)
   })
 
   it('Verify a new member can be invited and accept the invite', () => {
-    const spaceName = 'Space_' + Math.random().toString(36).substring(2, 12)
-    const memberName = 'Member_' + Math.random().toString(36).substring(2, 12)
-    const newInviteName = 'Invited_memeber_' + Math.random().toString(36).substring(2, 12)
+    const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
+    const memberName = 'Member ' + Math.random().toString(36).substring(2, 12)
+    const newInviteName = 'Invited member ' + Math.random().toString(36).substring(2, 12)
 
-    wallet.connectSigner(admin)
-    space.clickOnSignInBtn()
-    space.deleteAllSpaces()
-    space.createSpace(spaceName)
+    space.signInWithWallet(admin)
+    space.goToSpacesView()
+    space.ensureReadyToCreateSpace()
+    cy.wait(3000)
+    space.createSpaceViaOnboardingWithSkip(spaceName)
     space.clickOnSpaceSelector()
     space.spaceExists(spaceName)
 
     space.goToSpaceMembers()
     space.addMember(memberName, user_address)
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
-    wallet.connectSigner(user)
-    space.clickOnSignInBtn()
-    main.verifyElementByTextExists('Pending invitations')
-    cy.reload() // Required to trigger the invite
-    space.acceptInvite(newInviteName)
+    space.disconnectFromSpaceLevel()
+    cy.clearAllCookies()
+    cy.visit(constants.spacesUrl)
+    space.signInWithWallet(user)
+    // No reload here: a member with a pending invite is kept on /welcome/spaces after sign-in
+    // (useSignInRedirect only redirects when there are no invites), and a full reload would drop the
+    // freshly-connected injected wallet and leave the page blank. The banner renders once the
+    // member's spaces query resolves.
+    space.verifySpaceInviteBannerVisible(spaceName)
+    space.acceptInvite(spaceName, newInviteName)
+    main.verifyElementByTextExists(space.acceptInviteConfirmationMsg(spaceName))
+
+    // Clean up: the invitee is only a member and cannot delete the workspace, so sign back in as the
+    // admin who created it and remove it — keeping the run idempotent (tests 1 and 2 self-clean too).
+    space.disconnectFromSpaceLevel()
+    cy.clearAllCookies()
+    cy.visit(constants.spacesUrl)
+    space.signInWithWallet(admin)
+    space.goToSpacesView()
+    space.openSpaceByName(spaceName)
+    space.goToSpaceSettings()
+    space.verifySpaceSettingsGeneralLoaded()
+    space.deleteSpace(spaceName)
   })
 })

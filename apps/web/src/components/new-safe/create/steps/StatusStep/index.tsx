@@ -4,7 +4,7 @@ import type { NewSafeFormData } from '@/components/new-safe/create'
 import { getRedirect } from '@/components/new-safe/create/logic'
 import StatusMessage from '@/components/new-safe/create/steps/StatusStep/StatusMessage'
 import useUndeployedSafe from '@/components/new-safe/create/steps/StatusStep/useUndeployedSafe'
-import { lightPalette } from '@safe-global/theme'
+import { lightPalette } from '@safe-global/theme/palettes'
 import { AppRoutes } from '@/config/routes'
 import { safeCreationPendingStatuses } from '@/features/counterfactual'
 import { SafeCreationEvent, safeCreationSubscribe, isPredictedSafeProps } from '@/features/counterfactual/services'
@@ -139,7 +139,7 @@ export const CreateSafeStatus = ({
               gap: 2,
             }}
           >
-            <Link href={AppRoutes.welcome.index} passHref>
+            <Link href={AppRoutes.index} passHref>
               <Button variant="outlined" onClick={onCancel}>
                 Go to homepage
               </Button>

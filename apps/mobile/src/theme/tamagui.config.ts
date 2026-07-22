@@ -4,11 +4,12 @@ import { badgeTheme } from '@/src/components/Badge/theme'
 import { badgeTheme as NetworkBadgeTheme } from '@/src/components/NetworkBadge/theme'
 import { navbarTheme } from '@/src/features/Assets/components/Navbar/theme'
 import { fontSizes, tokens } from '@/src/theme/tokens'
-import { createAnimations } from '@tamagui/animations-moti'
+import { createAnimations } from '@tamagui/animations-reanimated'
 import { inputTheme, inputWithLabelTheme } from '../components/SafeInput/theme'
 import { safeTabTheme } from '@/src/components/SafeTab/theme'
 import { SafeListItemTheme } from '@/src/components/SafeListItem/theme'
 import { alertTheme } from '@/src/components/Alert/theme'
+import { approvalEditorTheme } from '@/src/features/ConfirmTx/components/ApprovalEditor/theme'
 import { safeShieldHeadlineStatusTheme } from '@/src/features/SafeShield/components/SafeShieldHeadline/theme'
 import { safeShieldAnalysisStatusTheme } from '@/src/features/SafeShield/theme'
 import { safeShieldWidgetTheme } from '../features/SafeShield/components/SafeShieldWidget/theme'
@@ -72,6 +73,7 @@ export const config = createTamagui({
     },
     ...badgeTheme,
     ...alertTheme,
+    ...approvalEditorTheme,
     ...inputTheme,
     ...NetworkBadgeTheme,
     ...navbarTheme,

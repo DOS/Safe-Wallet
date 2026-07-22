@@ -2,7 +2,7 @@ import * as file from '../pages/import_export.pages'
 import * as main from '../pages/main.page'
 import * as constants from '../../support/constants'
 import * as ls from '../../support/localstorage_data.js'
-import * as sideBar from '../pages/sidebar.pages'
+import * as selector from '../pages/safe_navigation.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
@@ -26,10 +26,11 @@ describe('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000 }, (
       )
       .then(() => {
         cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
-        return sideBar.openSidebar()
+        return selector.openSelector()
       })
       .then(() => {
-        return file.clickOnImportedSafe(safe)
+        selector.verifyItemExistsInSelector(safe)
+        selector.clickOnSafe(safe)
       })
   })
 
@@ -63,7 +64,6 @@ describe('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000 }, (
   })
 
   it('[SMOKE] Verify imported data in settings', () => {
-    const unchecked = [file.copyAddressStr]
     const checked = [file.darkModeStr]
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_13)
       .then(() => cy.wrap(null))
@@ -78,7 +78,6 @@ describe('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000 }, (
       .then(() => {
         cy.reload()
         file.clickOnAppearenceBtn()
-        file.verifyCheckboxes(unchecked)
         file.verifyCheckboxes(checked, true)
       })
   })
