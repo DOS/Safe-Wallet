@@ -423,7 +423,6 @@ export function addToLocalStorage(key, jsonValue) {
   return new Promise((resolve, reject) => {
     try {
       // This helper stores public Cypress fixtures, never credentials or production secrets.
-      // codeql[js/clear-text-storage-of-sensitive-data]
       window.localStorage.setItem(key, JSON.stringify(jsonValue))
       resolve('Item added to local storage successfully')
     } catch (error) {
