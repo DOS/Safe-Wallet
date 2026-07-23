@@ -21,7 +21,7 @@ export const getAppName = (): string => {
 
 export const createAppNameRegex = (template: string): RegExp => {
   const appName = getAppName()
-  const escapedAppName = appName.replace(/[{}]/g, '\\$&')
+  const escapedAppName = appName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   return new RegExp(template.replace('{APP_NAME}', escapedAppName))
 }
 
