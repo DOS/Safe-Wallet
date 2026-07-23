@@ -27,12 +27,14 @@ import type AccountItemContent from './components/AccountItem/AccountItemContent
 import type SafesList from './components/SafesList'
 import type AccountsNavigation from './components/AccountsNavigation'
 import type MyAccounts from './components/MyAccounts'
-import type SafeSelectionModal from './components/SafeSelectionModal'
+import type MyAccountsV2 from './components/MyAccountsV2'
 import type NonPinnedWarning from './components/NonPinnedWarning'
+import type AccountsWidget from './components/AccountsWidget/AccountsWidget'
 
 export interface MyAccountsContract {
   // Main component
   MyAccounts: typeof MyAccounts
+  MyAccountsV2: typeof MyAccountsV2
 
   // Externally used components (PascalCase → stub renders null)
   AccountItemButton: typeof AccountItemButton
@@ -50,8 +52,8 @@ export interface MyAccountsContract {
   AccountItemContent: typeof AccountItemContent
   SafesList: typeof SafesList
   AccountsNavigation: typeof AccountsNavigation
+  AccountsWidget: typeof AccountsWidget
 
   // Address safety components
-  SafeSelectionModal: typeof SafeSelectionModal
   NonPinnedWarning: typeof NonPinnedWarning
 }

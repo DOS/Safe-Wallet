@@ -12,6 +12,7 @@ import type { MyAccountsContract } from './contract'
 
 // Direct component imports (already lazy-loaded at feature level)
 import MyAccounts from './components/MyAccounts'
+import MyAccountsV2 from './components/MyAccountsV2'
 import AccountItemButton from './components/AccountItem/AccountItemButton'
 import AccountItemLink from './components/AccountItem/AccountItemLink'
 import AccountItemCheckbox from './components/AccountItem/AccountItemCheckbox'
@@ -27,13 +28,14 @@ import AccountItemQueueActions from './components/AccountItem/AccountItemQueueAc
 import AccountItemContent from './components/AccountItem/AccountItemContent'
 import SafesList from './components/SafesList'
 import AccountsNavigation from './components/AccountsNavigation'
-import SafeSelectionModal from './components/SafeSelectionModal'
 import NonPinnedWarning from './components/NonPinnedWarning'
+import AccountsWidget from './components/AccountsWidget/AccountsWidget'
 
 // Flat structure - naming determines stub behavior
 const feature: MyAccountsContract = {
   // Main component
   MyAccounts,
+  MyAccountsV2,
 
   // Externally used components (individual exports to avoid compound component issues)
   AccountItemButton,
@@ -51,9 +53,9 @@ const feature: MyAccountsContract = {
   AccountItemContent,
   SafesList,
   AccountsNavigation,
+  AccountsWidget,
 
   // Address safety components
-  SafeSelectionModal,
   NonPinnedWarning,
 }
 

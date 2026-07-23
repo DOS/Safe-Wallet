@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { fn } from '@storybook/test'
+import { fn } from 'storybook/test'
 import { Button, DialogActions, DialogContent, Typography } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import ModalDialog from './index'
@@ -10,7 +10,7 @@ const createInitialState = () => ({
     currency: 'usd',
     hiddenTokens: {},
     tokenList: TOKEN_LISTS.ALL,
-    shortName: { copy: true, qr: true },
+    shortName: { qr: true },
     theme: { darkMode: false },
     env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
     signing: { onChainSigning: false, blindSigning: false },

@@ -4,9 +4,11 @@ import useAllSafes, { type SafeItem, type SafeItems } from './useAllSafes'
 import { useMemo } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBookSlice'
+import type { VisitedSafesState } from '@/store/slices'
 import useWallet from '@/hooks/wallets/useWallet'
 import useAllOwnedSafes from './useAllOwnedSafes'
 import { useAppSelector } from '@/store'
+import { isMultiChainSafeItem } from './isMultiChainSafeItem'
 
 export type MultiChainSafeItem = {
   address: string
@@ -23,15 +25,9 @@ export type AllSafeItemsGrouped = {
 
 export type AllSafeItems = Array<SafeItem | MultiChainSafeItem>
 
-/**
- * Type guard to check if a safe item is a multi-chain safe
- */
-export const isMultiChainSafeItem = (safe: SafeItem | MultiChainSafeItem): safe is MultiChainSafeItem => {
-  if ('safes' in safe && 'address' in safe) {
-    return true
-  }
-  return false
-}
+// Defined in a dependency-free leaf module to avoid an import cycle; re-exported here (and via the
+// `@/hooks/safes` barrel) so existing consumers keep importing it from the same place.
+export { isMultiChainSafeItem }
 
 export const _buildMultiChainSafeItem = (address: string, safes: SafeItems): MultiChainSafeItem => {
   const isPinned = safes.some((safe) => safe.isPinned)
@@ -45,6 +41,7 @@ export function _buildSafeItems(
   safes: Record<string, string[] | null>,
   allSafeNames: AddressBookState,
   allOwned?: AllOwnedSafes,
+  allVisitedSafes?: VisitedSafesState,
 ): SafeItem[] {
   const result: SafeItem[] = []
 
@@ -54,13 +51,14 @@ export function _buildSafeItems(
     addresses?.forEach((address) => {
       const isReadOnly = !!allOwned && !(allOwned[chainId] || []).includes(address)
       const name = allSafeNames[chainId]?.[address]
+      const lastVisited = allVisitedSafes?.[chainId]?.[address]?.lastVisited || 0
 
       result.push({
         chainId,
         address,
         isReadOnly,
         isPinned: false,
-        lastVisited: 0,
+        lastVisited,
         name,
       })
     })
@@ -87,6 +85,15 @@ export const _getMultiChainAccounts = (safes: SafeItems): MultiChainSafeItem[] =
 
 export const _getSingleChainAccounts = (safes: SafeItems, allMultiChainSafes: MultiChainSafeItem[]) => {
   return safes.filter((safe) => !allMultiChainSafes.some((multiSafe) => sameAddress(multiSafe.address, safe.address)))
+}
+
+export const _groupAndSort = (
+  items: SafeItems,
+  sortComparator: (a: AllSafeItems[number], b: AllSafeItems[number]) => number,
+): AllSafeItems => {
+  const multi = _getMultiChainAccounts(items)
+  const single = _getSingleChainAccounts(items, multi)
+  return [...multi, ...single].sort(sortComparator)
 }
 
 export const useAllSafesGrouped = (customSafes?: SafeItems) => {

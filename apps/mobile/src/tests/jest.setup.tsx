@@ -155,6 +155,8 @@ jest.mock('@gorhom/bottom-sheet', () => {
         return null
       },
     }),
+    // Matches the unsafe variant of the real hook outside a sheet
+    useBottomSheetInternal: () => null,
   }
 })
 
@@ -162,6 +164,28 @@ jest.mock('@react-native-clipboard/clipboard', () => ({
   setString: jest.fn(),
   getString: jest.fn(),
 }))
+
+jest.mock('react-native-nitro-modules', () => ({
+  NitroModules: {
+    createHybridObject: jest.fn(),
+  },
+}))
+
+jest.mock('react-native-mmkv', () => {
+  const store = new Map<string, string | number | boolean>()
+  const mmkvMock = {
+    set: jest.fn((key: string, value: string | number | boolean) => store.set(key, value)),
+    getString: jest.fn((key: string) => store.get(key) as string | undefined),
+    getNumber: jest.fn((key: string) => store.get(key) as number | undefined),
+    getBoolean: jest.fn((key: string) => store.get(key) as boolean | undefined),
+    remove: jest.fn((key: string) => store.delete(key)),
+    clearAll: jest.fn(() => store.clear()),
+    getAllKeys: jest.fn(() => [...store.keys()]),
+  }
+  return {
+    createMMKV: jest.fn(() => ({ ...mmkvMock })),
+  }
+})
 
 jest.mock('react-native-quick-crypto', () => ({
   default: {
@@ -273,6 +297,8 @@ jest.mock('@react-native-firebase/crashlytics', () => {
 
 jest.mock('@datadog/mobile-react-native', () => require('@datadog/mobile-react-native/jest'))
 jest.mock('expo-datadog', () => require('@datadog/mobile-react-native/jest'))
+
+jest.mock('react-native-worklets', () => require('react-native-worklets/src/mock'))
 
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())

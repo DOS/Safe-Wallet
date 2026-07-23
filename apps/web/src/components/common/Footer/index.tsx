@@ -20,6 +20,8 @@ const footerPages = [
   AppRoutes.cookie,
   AppRoutes.terms,
   AppRoutes.licenses,
+  AppRoutes.welcome.accounts,
+  AppRoutes.welcome.spaces,
 ]
 
 const FooterLink = ({ children, href }: { children: ReactNode; href: string }): ReactElement => {
@@ -94,7 +96,7 @@ const Footer: React.FC<FooterProps> = ({
         )}
 
         <li>
-          <ExternalLink href={`${APP_HOMEPAGE}/releases/tag/v${APP_VERSION}`} noIcon>
+          <ExternalLink href={`${APP_HOMEPAGE}/releases/tag/web-v${APP_VERSION}`} noIcon>
             {versionIcon && <SvgIcon component={GitHubIcon} inheritViewBox fontSize="inherit" sx={{ mr: 0.5 }} />}v
             {APP_VERSION}
           </ExternalLink>
