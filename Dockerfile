@@ -1,4 +1,4 @@
-FROM node:24-alpine
+FROM node:24-alpine AS builder
 RUN apk add --no-cache libc6-compat git python3 py3-pip make g++ libusb-dev eudev-dev linux-headers
 
 WORKDIR /app
@@ -35,8 +35,16 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN yarn build
 
+FROM node:24-alpine AS runtime
+
+WORKDIR /app
+RUN npm install --global serve@14.2.5 \
+  && npm cache clean --force
+
+COPY --from=builder --chown=node:node /app/apps/web/out ./out
+
+USER node
 ENV PORT=8080
 EXPOSE 8080
 
-RUN npx -y serve --version
-CMD ["npx", "serve", "out", "-l", "8080"]
+CMD ["serve", "out", "-l", "8080"]
