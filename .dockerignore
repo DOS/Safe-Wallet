@@ -1,0 +1,13 @@
+.github
+.next
+.yarn/cache
+**/.next
+**/node_modules
+**/out
+**/playwright-report
+**/test-results
+node_modules
+out
+coverage
+report.json
+*.log
