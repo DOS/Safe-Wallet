@@ -29,8 +29,27 @@ jobs:
         if: failure() && steps.drift.outcome == 'failure'
         run: git diff --name-only -- packages/store/scripts/api-schema/schema.json packages/store/src/gateway/AUTO_GENERATED/ > "${RUNNER_TEMP}/drift-files.txt"
 
-      - name: Open or update drift issue
+      - name: Report drift
         if: failure() && steps.drift.outcome == 'failure'
+        run: |
+          {
+            echo "## Store codegen drift detected"
+            echo
+            echo 'The generated Store API client is out of sync with the staging CGW schema.'
+            echo
+            echo '**Fix:**'
+            echo '```bash'
+            echo 'yarn workspace @safe-global/store build:dev'
+            echo '```'
+            echo
+            echo '**Changed files:**'
+            echo '```text'
+            cat "${RUNNER_TEMP}/drift-files.txt"
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Open or update drift issue
+        if: failure() && steps.drift.outcome == 'failure' && vars.ENABLE_DRIFT_ISSUES == 'true'
         continue-on-error: true
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
