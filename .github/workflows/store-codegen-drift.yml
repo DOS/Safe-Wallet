@@ -25,6 +25,8 @@ jobs:
       - name: Test drift PR automation
         run: bash .github/scripts/tests/store-codegen-pull-request.test.sh
       - run: yarn workspace @safe-global/store build:dev
+      - name: Test generated endpoint routing
+        run: bash .github/scripts/tests/store-generated-endpoints.test.sh
       - name: Detect drift
         id: drift
         shell: bash
