@@ -36,6 +36,7 @@ codegen_paths=(
   "packages/store/src/gateway/AUTO_GENERATED/spaces.ts"
   "packages/store/src/gateway/AUTO_GENERATED/transactions.ts"
 )
+new_codegen_path="packages/store/src/gateway/AUTO_GENERATED/added.ts"
 
 git init --bare "${remote_path}" >/dev/null
 git init --initial-branch=dev "${repo_path}" >/dev/null
@@ -109,6 +110,18 @@ second_remote_sha="$(git --git-dir="${remote_path}" rev-parse refs/heads/automat
 assert_contains "pr edit 42" "${gh_log}"
 
 git -C "${repo_path}" checkout dev >/dev/null
+printf '%s\n' "${codegen_paths[@]}" "${new_codegen_path}" > "${drift_files}"
+printf 'added by schema refresh\n' > "${repo_path}/${new_codegen_path}"
+: > "${gh_log}"
+GH_STUB_PR_NUMBER=42 run_script
+
+third_remote_sha="$(git --git-dir="${remote_path}" rev-parse refs/heads/automation/store-codegen-drift)"
+[[ "${third_remote_sha}" != "${second_remote_sha}" ]] || fail "Automation branch was not updated for an untracked generated file"
+[[ "$(git --git-dir="${remote_path}" show "${third_remote_sha}:${new_codegen_path}")" == "added by schema refresh" ]] || fail "Untracked generated file was not pushed"
+assert_contains "pr edit 42" "${gh_log}"
+
+git -C "${repo_path}" checkout dev >/dev/null
+printf '%s\n' "${codegen_paths[@]}" > "${drift_files}"
 printf 'unexpected change\n' > "${repo_path}/README.md"
 printf 'third refresh\n' > "${repo_path}/${codegen_paths[0]}"
 : > "${gh_log}"
@@ -117,6 +130,8 @@ if GH_STUB_PR_NUMBER=42 run_script; then
 fi
 
 final_remote_sha="$(git --git-dir="${remote_path}" rev-parse refs/heads/automation/store-codegen-drift)"
-[[ "${final_remote_sha}" == "${second_remote_sha}" ]] || fail "Rejected run changed the remote branch"
+[[ "${final_remote_sha}" == "${third_remote_sha}" ]] || fail "Rejected run changed the remote branch"
+[[ "$(git -C "${repo_path}" config user.name)" == "Test User" ]] || fail "Script changed the local git user.name"
+[[ "$(git -C "${repo_path}" config user.email)" == "test@example.com" ]] || fail "Script changed the local git user.email"
 
 echo "PASS: store codegen PR automation"

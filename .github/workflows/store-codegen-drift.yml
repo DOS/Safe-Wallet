@@ -28,11 +28,25 @@ jobs:
         id: drift
         shell: bash
         run: |
-          if git diff --quiet -- packages/store/scripts/api-schema/schema.json packages/store/src/gateway/AUTO_GENERATED/; then
+          codegen_paths=(
+            packages/store/scripts/api-schema/schema.json
+            packages/store/src/gateway/AUTO_GENERATED/
+          )
+
+          : > "${RUNNER_TEMP}/drift-files.txt"
+          while IFS= read -r -d '' changed_path; do
+            if [[ -n "${changed_path}" ]]; then
+              printf '%s\n' "${changed_path}" >> "${RUNNER_TEMP}/drift-files.txt"
+            fi
+          done < <(
+            git diff -z --name-only HEAD -- "${codegen_paths[@]}"
+            git ls-files -z --others --exclude-standard -- "${codegen_paths[@]}"
+          )
+
+          if [[ ! -s "${RUNNER_TEMP}/drift-files.txt" ]]; then
             echo "changed=false" >> "${GITHUB_OUTPUT}"
           else
             echo "changed=true" >> "${GITHUB_OUTPUT}"
-            git diff --name-only -- packages/store/scripts/api-schema/schema.json packages/store/src/gateway/AUTO_GENERATED/ > "${RUNNER_TEMP}/drift-files.txt"
           fi
 
       - name: Report drift

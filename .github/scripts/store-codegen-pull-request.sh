@@ -22,13 +22,17 @@ is_codegen_path() {
     [[ "${candidate}" == packages/store/src/gateway/AUTO_GENERATED/* ]]
 }
 
+collect_changed_paths() {
+  git diff -z --name-only HEAD
+  git ls-files -z --others --exclude-standard
+}
+
 unexpected_paths=()
-while IFS= read -r -d '' status_entry; do
-  changed_path="${status_entry:3}"
-  if ! is_codegen_path "${changed_path}"; then
+while IFS= read -r -d '' changed_path; do
+  if [[ -n "${changed_path}" ]] && ! is_codegen_path "${changed_path}"; then
     unexpected_paths+=("${changed_path}")
   fi
-done < <(git status --porcelain=v1 -z --untracked-files=all)
+done < <(collect_changed_paths)
 
 if (( ${#unexpected_paths[@]} > 0 )); then
   echo "Refusing to create an automation PR with changes outside the codegen allowlist:" >&2
@@ -36,23 +40,29 @@ if (( ${#unexpected_paths[@]} > 0 )); then
   exit 1
 fi
 
-if git diff --quiet -- "${codegen_targets[@]}"; then
+drift_paths=()
+while IFS= read -r -d '' changed_path; do
+  if [[ -n "${changed_path}" ]] && is_codegen_path "${changed_path}"; then
+    drift_paths+=("${changed_path}")
+  fi
+done < <(collect_changed_paths)
+
+if (( ${#drift_paths[@]} == 0 )); then
   echo "No store codegen drift found."
   exit 0
 fi
 
-git config user.name "github-actions[bot]"
-git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 git checkout -B "${automation_branch}"
 git add -- "${codegen_targets[@]}"
-git commit -m "${pr_title}"
+git \
+  -c user.name="github-actions[bot]" \
+  -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+  commit -m "${pr_title}"
 
 gh auth setup-git
 
 remote_sha="$(git ls-remote --heads origin "refs/heads/${automation_branch}" | awk '{print $1}')"
 if [[ -n "${remote_sha}" ]]; then
-  git fetch --depth=1 origin \
-    "refs/heads/${automation_branch}:refs/remotes/origin/${automation_branch}"
   git push \
     --force-with-lease="refs/heads/${automation_branch}:${remote_sha}" \
     origin "HEAD:refs/heads/${automation_branch}"
@@ -66,7 +76,7 @@ trap 'rm -f "${body_file}"' EXIT
   echo "The Store Codegen Drift workflow detected an upstream schema change and regenerated the checked-in gateway client snapshot."
   echo
   echo "Changed generated files:"
-  sed 's/^/- `/' "${DRIFT_FILES_PATH}" | sed 's/$/`/'
+  sed 's/\(.*\)/- `\1`/' "${DRIFT_FILES_PATH}"
   echo
   echo "This PR is automation-created, but it is intentionally not auto-merged."
 } > "${body_file}"
