@@ -228,6 +228,44 @@ describe('TransactionConfirmationStrategy', () => {
       expect(mockTrackEvent).toHaveBeenCalledWith(mockEventData)
     })
 
+    it('should handle module guard settings change transactions', () => {
+      const mockTransaction = {
+        txInfo: {
+          type: 'SettingsChange',
+          dataDecoded: {
+            method: 'setModuleGuard',
+            parameters: [],
+          },
+          settingsInfo: {
+            type: 'SET_MODULE_GUARD',
+            address: { value: '0x000000000000000000000000000000000000c0de' },
+          },
+        },
+        id: 'module_guard_settings_tx',
+        timestamp: Date.now(),
+        txStatus: 'SUCCESS',
+      }
+
+      const action: ActionWithPayload = {
+        type: 'settings/module-guard/fulfilled',
+        payload: mockTransaction,
+      }
+
+      const mockEventData = {
+        eventName: EventType.TX_CONFIRMED,
+        eventCategory: 'transactions',
+        eventAction: 'Confirm transaction',
+        eventLabel: ANALYTICS_LABELS.SETTINGS_TYPES.SET_MODULE_GUARD,
+      }
+
+      mockCreateTxConfirmEvent.mockReturnValue(mockEventData)
+
+      strategy.execute(mockStore, action)
+
+      expect(mockCreateTxConfirmEvent).toHaveBeenCalledWith(ANALYTICS_LABELS.SETTINGS_TYPES.SET_MODULE_GUARD)
+      expect(mockTrackEvent).toHaveBeenCalledWith(mockEventData)
+    })
+
     it('should handle rejection transactions', () => {
       const mockTransaction = {
         txInfo: {
