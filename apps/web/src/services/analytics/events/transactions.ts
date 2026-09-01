@@ -10,6 +10,8 @@ export enum TX_TYPES {
   // Module txs
   guard_remove = 'guard_remove',
   module_remove = 'module_remove',
+  module_guard_set = 'module_guard_set',
+  module_guard_remove = 'module_guard_remove',
 
   // Transfers
   transfer_token = 'transfer_token',

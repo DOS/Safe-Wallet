@@ -81,6 +81,12 @@ export const getTransactionTrackingType = (
       case SettingsInfoType.DELETE_GUARD: {
         return TX_TYPES.guard_remove
       }
+      case SettingsInfoType.SET_MODULE_GUARD: {
+        return TX_TYPES.module_guard_set
+      }
+      case SettingsInfoType.DELETE_MODULE_GUARD: {
+        return TX_TYPES.module_guard_remove
+      }
     }
   }
 

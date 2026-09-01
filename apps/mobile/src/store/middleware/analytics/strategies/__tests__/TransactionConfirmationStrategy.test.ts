@@ -238,7 +238,7 @@ describe('TransactionConfirmationStrategy', () => {
           },
           settingsInfo: {
             type: 'SET_MODULE_GUARD',
-            address: { value: '0x000000000000000000000000000000000000c0de' },
+            moduleGuard: { value: '0x000000000000000000000000000000000000c0de' },
           },
         },
         id: 'module_guard_settings_tx',

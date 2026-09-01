@@ -125,6 +125,32 @@ describe('getTransactionTrackingType', () => {
     expect(txType).toEqual(TX_TYPES.guard_remove)
   })
 
+  it('should return module_guard_set for set module guard settings changes', async () => {
+    const details = {
+      txInfo: {
+        type: TransactionInfoType.SETTINGS_CHANGE,
+        settingsInfo: {
+          type: SettingsInfoType.SET_MODULE_GUARD,
+        },
+      },
+    } as unknown as TransactionDetails
+    const txType = getTransactionTrackingType(details)
+    expect(txType).toEqual(TX_TYPES.module_guard_set)
+  })
+
+  it('should return module_guard_remove for delete module guard settings changes', async () => {
+    const details = {
+      txInfo: {
+        type: TransactionInfoType.SETTINGS_CHANGE,
+        settingsInfo: {
+          type: SettingsInfoType.DELETE_MODULE_GUARD,
+        },
+      },
+    } as unknown as TransactionDetails
+    const txType = getTransactionTrackingType(details)
+    expect(txType).toEqual(TX_TYPES.module_guard_remove)
+  })
+
   it('should return rejection for rejection transactions', async () => {
     const details = {
       txInfo: {
