@@ -515,6 +515,8 @@ export type SpaceAuditLogEntryDto = {
     | 'SAFE_REMOVED'
     | 'ADDRESS_BOOK_UPSERTED'
     | 'ADDRESS_BOOK_DELETED'
+    | 'ADDRESS_BOOK_REQUEST_CREATED'
+    | 'ADDRESS_BOOK_REQUEST_REJECTED'
   actorUserId: number
   /** Resolved (and masked) display string of the acting user. */
   actor: string
@@ -631,7 +633,7 @@ export type EntitlementsPlan = {
   /** End of the current billing cycle */
   cycleEndsAt: string | null
 }
-export type FeatureKey = 'safe_seats'
+export type FeatureKey = 'safe_seats' | 'sponsored_transactions'
 export type BinaryEntitlement = {
   /** Feature key from the entitlements catalog. */
   feature: FeatureKey
