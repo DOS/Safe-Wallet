@@ -133,6 +133,10 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['spaces'],
       }),
+      spaceSafesGetAllV1: build.query<SpaceSafesGetAllV1ApiResponse, SpaceSafesGetAllV1ApiArg>({
+        query: () => ({ url: `/v1/spaces/safes` }),
+        providesTags: ['spaces'],
+      }),
       membersInviteUserV1: build.mutation<MembersInviteUserV1ApiResponse, MembersInviteUserV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/spaces/${queryArg.spaceId}/members/invite`,
@@ -198,6 +202,13 @@ const injectedRtkApi = api
       >({
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/counterfactual-safes` }),
         providesTags: ['spaces'],
+      }),
+      entitlementsGetAllEntitlementsV1: build.query<
+        EntitlementsGetAllEntitlementsV1ApiResponse,
+        EntitlementsGetAllEntitlementsV1ApiArg
+      >({
+        query: () => ({ url: `/v1/spaces/entitlements` }),
+        providesTags: ['entitlements'],
       }),
       entitlementsGetEntitlementsV1: build.query<
         EntitlementsGetEntitlementsV1ApiResponse,
@@ -325,6 +336,9 @@ export type SpaceSafesDeleteV1ApiArg = {
   /** List of Safe addresses and their chain information to remove from the space */
   deleteSpaceSafesDto: DeleteSpaceSafesDto
 }
+export type SpaceSafesGetAllV1ApiResponse =
+  /** status 200 Safes of all spaces retrieved successfully */ GetSpacesSafesResponse[]
+export type SpaceSafesGetAllV1ApiArg = void
 export type MembersInviteUserV1ApiResponse = /** status 200 Users invited successfully */ Invitation[]
 export type MembersInviteUserV1ApiArg = {
   /** Space UUID to invite users to */
@@ -394,6 +408,10 @@ export type SpaceCounterfactualSafesGetV1ApiArg = {
   /** Space UUID */
   spaceId: string
 }
+export type EntitlementsGetAllEntitlementsV1ApiResponse = /** status 200  */ {
+  [key: string]: EntitlementsResponse
+}
+export type EntitlementsGetAllEntitlementsV1ApiArg = void
 export type EntitlementsGetEntitlementsV1ApiResponse = /** status 200  */ EntitlementsResponse
 export type EntitlementsGetEntitlementsV1ApiArg = {
   /** Space UUID */
@@ -515,6 +533,8 @@ export type SpaceAuditLogEntryDto = {
     | 'SAFE_REMOVED'
     | 'ADDRESS_BOOK_UPSERTED'
     | 'ADDRESS_BOOK_DELETED'
+    | 'ADDRESS_BOOK_REQUEST_CREATED'
+    | 'ADDRESS_BOOK_REQUEST_REJECTED'
   actorUserId: number
   /** Resolved (and masked) display string of the acting user. */
   actor: string
@@ -541,6 +561,8 @@ export type SpaceSafeDto = {
 }
 export type CreateSpaceSafesDto = {
   safes: SpaceSafeDto[]
+  /** Address book entries to upsert for the added Safes, in the same transaction: if either write fails, neither is kept. */
+  addressBookItems?: AddressBookItem[]
 }
 export type GetSpaceSafeResponse = {
   safes: {
@@ -549,6 +571,13 @@ export type GetSpaceSafeResponse = {
 }
 export type DeleteSpaceSafesDto = {
   safes: SpaceSafeDto[]
+}
+export type GetSpacesSafesResponse = {
+  safes: {
+    [key: string]: string[]
+  }
+  /** Space UUID */
+  spaceUuid: string
 }
 export type Invitation = {
   userId: number
@@ -581,6 +610,7 @@ export type MemberUser = {
   id: number
   status: 'PENDING' | 'ACTIVE'
   email: string | null
+  address: string | null
 }
 export type MemberDto = {
   id: number
@@ -624,14 +654,17 @@ export type GetCounterfactualSafesResponse = {
     [key: string]: GetCounterfactualSafeItem[]
   }
 }
+export type EntitlementsPlanStatus = 'active' | 'trialing'
 export type EntitlementsPlan = {
   /** Plan identifier in the billing service */
   id: string
   name: string | null
   /** End of the current billing cycle */
   cycleEndsAt: string | null
+  /** Status of the subscription the plan comes from */
+  status: EntitlementsPlanStatus
 }
-export type FeatureKey = 'safe_seats'
+export type FeatureKey = 'safe_seats' | 'copilot_scans' | 'sponsored_transactions' | 'policies'
 export type BinaryEntitlement = {
   /** Feature key from the entitlements catalog. */
   feature: FeatureKey
@@ -701,6 +734,8 @@ export const {
   useSpaceSafesGetV1Query,
   useLazySpaceSafesGetV1Query,
   useSpaceSafesDeleteV1Mutation,
+  useSpaceSafesGetAllV1Query,
+  useLazySpaceSafesGetAllV1Query,
   useMembersInviteUserV1Mutation,
   useMembersAcceptInviteV1Mutation,
   useMembersDeclineInviteV1Mutation,
@@ -715,6 +750,8 @@ export const {
   useMembersRemoveUserV1Mutation,
   useSpaceCounterfactualSafesGetV1Query,
   useLazySpaceCounterfactualSafesGetV1Query,
+  useEntitlementsGetAllEntitlementsV1Query,
+  useLazyEntitlementsGetAllEntitlementsV1Query,
   useEntitlementsGetEntitlementsV1Query,
   useLazyEntitlementsGetEntitlementsV1Query,
 } = injectedRtkApi
