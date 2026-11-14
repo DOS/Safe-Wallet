@@ -86,6 +86,23 @@ const injectedRtkApi = api
         }),
         providesTags: ['transactions'],
       }),
+      transactionsGetOutgoingTransfersV1: build.query<
+        TransactionsGetOutgoingTransfersV1ApiResponse,
+        TransactionsGetOutgoingTransfersV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/outgoing-transfers`,
+          params: {
+            trusted: queryArg.trusted,
+            execution_date__gte: queryArg.executionDateGte,
+            execution_date__lte: queryArg.executionDateLte,
+            to: queryArg.to,
+            token_address: queryArg.tokenAddress,
+            cursor: queryArg.cursor,
+          },
+        }),
+        providesTags: ['transactions'],
+      }),
       transactionsPreviewTransactionV1: build.mutation<
         TransactionsPreviewTransactionV1ApiResponse,
         TransactionsPreviewTransactionV1ApiArg
@@ -206,7 +223,7 @@ export type TransactionsGetModuleTransactionsV1ApiArg = {
   cursor?: string
 }
 export type TransactionsAddConfirmationV1ApiResponse =
-  /** status 200 Transaction details with updated confirmation status */ Transaction
+  /** status 200 Transaction details with updated confirmation status */ TransactionDetails
 export type TransactionsAddConfirmationV1ApiArg = {
   /** Chain ID where the Safe is deployed */
   chainId: string
@@ -233,6 +250,26 @@ export type TransactionsGetIncomingTransfersV1ApiArg = {
   /** Filter by transfer value in wei */
   value?: string
   /** Filter by token contract address (0x prefixed hex string for ERC-20 tokens) */
+  tokenAddress?: string
+  /** Pagination cursor for retrieving the next set of results */
+  cursor?: string
+}
+export type TransactionsGetOutgoingTransfersV1ApiResponse =
+  /** status 200 Paginated list of outgoing transfers */ TransferTransactionItemPage
+export type TransactionsGetOutgoingTransfersV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
+  chainId: string
+  /** Safe contract address (0x prefixed hex string) */
+  safeAddress: string
+  /** When true (default), ERC-20 transfers of untrusted tokens are omitted, since any token contract can emit a transfer the Safe never made. ERC-721 and native transfers are not filtered. ERC-20 transfers without value are always omitted. */
+  trusted?: boolean
+  /** Filter by execution date greater than or equal to (ISO 8601 UTC, e.g. 2024-01-01T00:00:00Z) */
+  executionDateGte?: string
+  /** Filter by execution date less than or equal to (ISO 8601 UTC, e.g. 2024-01-01T00:00:00Z) */
+  executionDateLte?: string
+  /** Filter by transfer recipient address (0x prefixed hex string) */
+  to?: string
+  /** Filter by token contract address (0x prefixed hex string) */
   tokenAddress?: string
   /** Pagination cursor for retrieving the next set of results */
   cursor?: string
@@ -809,6 +846,7 @@ export type ModuleExecutionDetails = {
   address: AddressInfo
 }
 export type SafeAppInfo = {
+  id: number
   name: string
   url: string
   logoUri?: string | null
@@ -915,6 +953,17 @@ export type IncomingTransferPage = {
   previous?: string | null
   results: IncomingTransfer[]
 }
+export type TransactionItem = {
+  type: 'TRANSACTION'
+  transaction: Transaction
+  conflictType: 'None'
+}
+export type TransferTransactionItemPage = {
+  count?: number | null
+  next?: string | null
+  previous?: string | null
+  results: TransactionItem[]
+}
 export type TransactionPreview = {
   txInfo:
     | CreationTransactionInfo
@@ -960,11 +1009,6 @@ export type QueuedItemPage = {
   previous?: string | null
   results: (ConflictHeaderQueuedItem | LabelQueuedItem | TransactionQueuedItem)[]
 }
-export type TransactionItem = {
-  type: 'TRANSACTION'
-  transaction: Transaction
-  conflictType: 'None'
-}
 export type DateLabel = {
   type: 'DATE_LABEL'
   timestamp: number
@@ -974,6 +1018,21 @@ export type TransactionItemPage = {
   next?: string | null
   previous?: string | null
   results: (TransactionItem | DateLabel)[]
+}
+export type NestedTransactionDto = {
+  to?: string | null
+  value: string
+  data?: string | null
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
+  safeTxGas: string
+  baseGas: string
+  gasPrice: string
+  gasToken?: string | null
+  refundReceiver?: string | null
+  /** The nested Safe's nonce */
+  nonce: string
+  notes?: string | null
 }
 export type ProposeTransactionDto = {
   to: string
@@ -991,6 +1050,8 @@ export type ProposeTransactionDto = {
   sender: string
   signature?: string | null
   origin?: string | null
+  /** A child transaction for a second Safe, authorised by the parent transaction being an `approveHash` call committing to its hash. Unknown keys are rejected. */
+  nestedTransaction?: NestedTransactionDto | null
 }
 export type CreationTransaction = {
   created: string
@@ -1013,6 +1074,8 @@ export const {
   useTransactionsAddConfirmationV1Mutation,
   useTransactionsGetIncomingTransfersV1Query,
   useLazyTransactionsGetIncomingTransfersV1Query,
+  useTransactionsGetOutgoingTransfersV1Query,
+  useLazyTransactionsGetOutgoingTransfersV1Query,
   useTransactionsPreviewTransactionV1Mutation,
   useTransactionsGetTransactionQueueV1Query,
   useLazyTransactionsGetTransactionQueueV1Query,
