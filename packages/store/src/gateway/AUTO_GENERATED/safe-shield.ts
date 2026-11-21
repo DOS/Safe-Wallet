@@ -353,6 +353,7 @@ export type TypedDataDomain = {
   salt?: string
   verifyingContract?: string
   version?: string
+  safe?: string
 }
 export type TypedDataParameter = {
   name: string
