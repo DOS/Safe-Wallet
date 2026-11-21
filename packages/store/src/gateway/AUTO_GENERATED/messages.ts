@@ -86,6 +86,7 @@ export type TypedDataDomain = {
   salt?: string
   verifyingContract?: string
   version?: string
+  safe?: string
 }
 export type TypedDataParameter = {
   name: string
@@ -110,35 +111,45 @@ export type MessageConfirmation = {
   owner: AddressInfo
   signature: string
 }
+export type SafeAppInfo = {
+  id: number
+  name: string
+  url: string
+  logoUri?: string | null
+}
 export type Message = {
   messageHash: string
   status: 'NEEDS_CONFIRMATION' | 'CONFIRMED'
-  logoUri?: string | null
-  name?: string | null
+  logoUri: string | null
+  name: string | null
   message: string | TypedData
   creationTimestamp: number
   modifiedTimestamp: number
   confirmationsSubmitted: number
   confirmationsRequired: number
-  proposedBy: AddressInfo
+  proposedBy: AddressInfo | null
   confirmations: MessageConfirmation[]
-  preparedSignature?: string | null
-  origin?: string | null
+  preparedSignature: string | null
+  origin: string | null
+  safeAppInfo: SafeAppInfo | null
+  safeAppId: number | null
 }
 export type MessageItem = {
   messageHash: string
   status: 'NEEDS_CONFIRMATION' | 'CONFIRMED'
-  logoUri?: string | null
-  name?: string | null
+  logoUri: string | null
+  name: string | null
   message: string | TypedData
   creationTimestamp: number
   modifiedTimestamp: number
   confirmationsSubmitted: number
   confirmationsRequired: number
-  proposedBy: AddressInfo
+  proposedBy: AddressInfo | null
   confirmations: MessageConfirmation[]
-  preparedSignature?: string | null
-  origin?: string | null
+  preparedSignature: string | null
+  origin: string | null
+  safeAppInfo: SafeAppInfo | null
+  safeAppId: number | null
   type: 'MESSAGE'
 }
 export type DateLabel = {
@@ -151,11 +162,23 @@ export type MessagePage = {
   previous?: string | null
   results: (MessageItem | DateLabel)[]
 }
+export type DeclaredAttributionDto = {
+  /** Where the user started the request. Known values: NATIVE_TRANSFER, NATIVE_BATCH, SAFE_APP, WALLET_CONNECT, WIDGET, DIRECT, MCP, CLI. Truncated to 64 characters. */
+  channel?: string | null
+  /** App name. Truncated to 256 characters. */
+  appName?: string | null
+  /** App origin and path. Truncated to 2048 characters. */
+  appUrl?: string | null
+  /** ID of a listed Safe App. */
+  appId?: number | null
+}
 export type CreateMessageDto = {
   message: string | TypedData
   safeAppId?: number | null
   signature: string
   origin?: string | null
+  /** Where the request came from, as reported by the client. */
+  declared?: DeclaredAttributionDto | null
 }
 export type UpdateMessageSignatureDto = {
   signature: string
